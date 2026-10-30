@@ -17,6 +17,7 @@
         --border: #1e2924;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    html { scroll-behavior: smooth; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 100px; display: flex; justify-content: center; }
     
     .container { width: 100%; max-width: 480px; padding: 20px; position: relative; }
@@ -50,7 +51,6 @@
     .dev-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-top: 30px; }
     .dev-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
     
-    /* SỬA LINK ẢNH AVATAR TẠI ĐÂY */
     .dev-avatar { 
         width: 50px; height: 50px; 
         border-radius: 12px; 
@@ -151,7 +151,7 @@
     .music-btn:hover { background: rgba(255, 255, 255, 0.3); }
     .music-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
-   /* ===== PLAYLIST PANEL ===== */
+    /* ===== PLAYLIST PANEL ===== */
     .playlist-panel {
         position: fixed;
         bottom: 80px;
@@ -194,8 +194,8 @@
     }
     .song-item:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
     .song-item.active { background: rgba(88, 245, 179, 0.15); color: var(--primary); font-weight: 600; }
-	
-   /* ===== NOTIFICATION MODAL ===== */
+
+    /* ===== NOTIFICATION MODAL ===== */
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -278,6 +278,7 @@
     <div class="header">
         <div class="logo-box">OBI</div>
         <div class="brand-name">OBI MOD GAME</div>
+        <!-- Nút chuông -->
         <div class="bell-icon" onclick="openNotifications()">
             <i class="fa-solid fa-bell"></i>
             <div class="bell-dot"></div>
@@ -295,7 +296,8 @@
         Tập trung vào nội dung cần thiết: phiên bản mới, nền tảng hỗ trợ, tải xuống — không còn giao diện sáng hay chi tiết thừa.
     </div>
     
-    <a href="#library" class="btn btn-primary">Xem ứng dụng <i class="fa-solid fa-arrow-right"></i></a>
+    <!-- Nút Xem ứng dụng (đã fix độ trễ) -->
+    <a href="#library" onclick="event.preventDefault(); document.getElementById('library').scrollIntoView({ behavior: 'smooth' });" class="btn btn-primary">Xem Menu <i class="fa-solid fa-arrow-right"></i></a>
     <a href="https://t.me/obi1082" target="_blank" class="btn btn-outline">Telegram @obi1082</a>
     
     <div class="features">
@@ -307,7 +309,6 @@
     <!-- Dev Info -->
     <div class="dev-card">
         <div class="dev-header">
-            <!-- Khung Avatar đã cố định ảnh -->
             <div class="dev-avatar"></div>
             <div class="dev-info">
                 <p>Owner / Developer</p>
@@ -347,8 +348,8 @@
     <!-- Library -->
     <div class="library-header" id="library">
         <div class="library-tag">LIBRARY</div>
-        <div class="library-title">TẢI XUỐNG ỨNG DỤNG</div>
-        <div class="library-desc">CHỌN ỨNG DỤNG BÊN DƯỚI ĐỂ TẢI FILE CÀI ĐẶT.</div>
+        <div class="library-title">TẢI XUỐNG MENU </div>
+        <div class="library-desc">CHỌN MENU BÊN DƯỚI ĐỂ TẢI FILE CÀI ĐẶT.</div>
     </div>
 
     <div class="search-box">
@@ -520,18 +521,7 @@
 </div>
 
 <script>
-    // Mở/đóng Thông báo
-    function openNotifications() {
-        document.getElementById('notifModal').classList.add('active');
-    }
-
-    function closeNotifications(e) {
-        if(!e || e.target.id === 'notifModal' || e.currentTarget.classList.contains('notif-close')) {
-            document.getElementById('notifModal').classList.remove('active');
-        }
-    }
-
-    // Xử lý bộ lọc sản phẩm
+    // 1. Hàm lọc sản phẩm (Nút AOV)
     function filterProducts(category, btnElement) {
         document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
         btnElement.classList.add('active');
@@ -546,8 +536,24 @@
         });
     }
 
-// ===== NHẠC =====
-    const playlist = 
+    // 2. Hàm cuộn lên đầu trang
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 3. Hàm mở/đóng thông báo
+    function openNotifications() {
+        document.getElementById('notifModal').classList.add('active');
+    }
+
+    function closeNotifications(e) {
+        if(!e || e.target.id === 'notifModal' || e.currentTarget.classList.contains('notif-close')) {
+            document.getElementById('notifModal').classList.remove('active');
+        }
+    }
+
+    // 4. Code nhạc
+    const playlist = [
         { name: "Ngày Còn Đôi Mươi", src: "https://n.uguu.se/TzagzrVP.mp3" },
         { name: "Gió Đêm Qua Đường", src: "https://d.uguu.se/BnHNOxSF.mp3" },
         { name: "Vì Anh Thương Em", src: "https://d.uguu.se/xXBLKORR.mp3" }
@@ -607,17 +613,14 @@
 
     function prevSong() {
         currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-        audio.src = playlist[currentSongIndex].src;
+		        audio.src = playlist[currentSongIndex].src;
         playSong();
         renderPlaylist();
     }
 
     audio.addEventListener('ended', nextSong);
-
-    // Khởi tạo bài hát đầu tiên
     audio.src = playlist[currentSongIndex].src;
     renderPlaylist();
-
 </script>
 
 </body>
